@@ -1,15 +1,47 @@
 import json
 import pickle
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-t1 = AutoTokenizer.from_pretrained("./weights", src_lang="rus_Cyrl")
-m1 = AutoModelForSeq2SeqLM.from_pretrained("./weights").cuda()
-with open("input.pickle", "rb") as f1:
-    d1 = pickle.load(f1)
-r1 = []
-for x1 in d1:
-    i1 = t1(x1["src"], return_tensors="pt").to("cuda")
-    o1 = m1.generate(**i1, forced_bos_token_id=t1.convert_tokens_to_ids("rus_Cyrl"), max_length=1024)
-    v1 = t1.decode(o1[0], skip_special_tokens=True)
-    r1.append({"rid": x1["rid"], "translation": v1})
-with open("output.json", "w") as f2:
-    json.dump(r1, f2, ensure_ascii=False)
+import torch
+
+tokenizer = AutoTokenizer.from_pretrained("./weights", src_lang="rus_Cyrl")
+model = AutoModelForSeq2SeqLM.from_pretrained("./weights").cuda()
+model.eval()
+
+with open("input.pickle", "rb") as f:
+    data = pickle.load(f)
+
+tgt_lang_id = tokenizer.convert_tokens_to_ids("abk_Cyrl")
+
+results = []
+BATCH_SIZE = 8
+
+for i in range(0, len(data), BATCH_SIZE):
+    batch = data[i:i+BATCH_SIZE]
+    texts = [item["src"] for item in batch]
+    
+    inputs = tokenizer(
+        texts,
+        return_tensors="pt",
+        padding=True,
+        truncation=True,
+        max_length=256
+    ).to("cuda")
+    
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            forced_bos_token_id=tgt_lang_id,
+            max_length=256,
+            num_beams=5,
+            length_penalty=1.0,
+            no_repeat_ngram_size=3
+        )
+    
+    translations = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+    for item, trans in zip(batch, translations):
+        results.append({"rid": item["rid"], "translation": trans})
+
+with open("output.json", "w") as f:
+    json.dump(results, f, ensure_ascii=False)
+
+print(f"Переведено {len(results)} предложений")

@@ -6,8 +6,9 @@ RUN apt-get update && apt-get install -y build-essential
 
 RUN pip3 install --no-cache-dir \
     "accelerate" \
-    "transformers==5.5.0"
-
+    "transformers==5.5.0" \
+    "sentencepiece" \
+    "protobuf"
 
 WORKDIR /workspace
 COPY . .
