@@ -8,7 +8,7 @@ with open("input.pickle", "rb") as f1:
 r1 = []
 for x1 in d1:
     i1 = t1(x1["src"], return_tensors="pt").to("cuda")
-    o1 = m1.generate(**i1, forced_bos_token_id=t1.lang_code_to_id["rus_Cyrl"], max_length=1024)
+    o1 = m1.generate(**i1, forced_bos_token_id=t1.convert_tokens_to_ids("rus_Cyrl"), max_length=1024)
     v1 = t1.decode(o1[0], skip_special_tokens=True)
     r1.append({"rid": x1["rid"], "translation": v1})
 with open("output.json", "w") as f2:
