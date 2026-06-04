@@ -1,10 +1,10 @@
-import json
-import pickle
+import json, pickle
 from transformers import AutoProcessor, AutoModelForCausalLM
 
-MODEL_DIR = "./weights"
+W = "./weights"
 
-SYS_PROMPT = """You are a highly accurate English-to-Russian technical translator.
+# pass1 - draft translation
+P1 = """You are a highly accurate English-to-Russian technical translator.
 Translate the following text into Russian.
 STRICT RULES:
 1. DO NOT change punctuation types. Keep original single (') and double (") quotes. NEVER use French guillemets (« »).
@@ -29,38 +29,59 @@ Translation: Алекс заявила, что она была уверена, �
 Source: {src}
 Translation: """
 
+# tmp fix gender
+P2 = """Review this Russian translation and fix it based on the English source text.
+Fix ONLY these issues:
+1. Gender agreement: if English uses "she/her" for a person, ALL Russian verbs for that person MUST use feminine endings (заявила, сказала, вошла, была). If "he/him" — masculine (заявил, сказал, вошёл, был).
+2. Verb "said that" should be "заявил(а), что"; "said in the interview" should be "рассказал(а) в интервью".
+DO NOT change punctuation, terminology, word order, or phrasing. If translation is already correct, output it unchanged.
+Output ONLY the corrected Russian text, nothing else.
+
+English source: {src}
+Russian translation: {draft}
+Corrected translation:"""
+
 def main():
     with open("input.pickle", "rb") as f:
-        r = pickle.load(f)
+        d = pickle.load(f)
+    p = AutoProcessor.from_pretrained(W)
+    m = AutoModelForCausalLM.from_pretrained(W, dtype="auto", device_map="auto")
 
-    p = AutoProcessor.from_pretrained(MODEL_DIR)
-    m = AutoModelForCausalLM.from_pretrained(MODEL_DIR, dtype="auto", device_map="auto")
+    res_arr = []
+    for x in d:
+        src_t = x["src"]
 
-    o = []
-    for x in r:
-        t = p.apply_chat_template([{"role": "user", "content": SYS_PROMPT.format(src=x["src"])}], tokenize=False, add_generation_prompt=True, enable_thinking=False)
-        i = p(text=t, return_tensors="pt").to(m.device)
-        l = i["input_ids"].shape[-1]
-
-        out = m.generate(
-            **i,
-            max_new_tokens=1024,
-            num_beams=4,
-            do_sample=False,
-            repetition_penalty=1.15
-        )
-        res = p.decode(out[0][l:], skip_special_tokens=False)
-
+        # pass1 draft
+        t1 = p.apply_chat_template([{"role": "user", "content": P1.format(src=src_t)}], tokenize=False, add_generation_prompt=True, enable_thinking=False)
+        i1 = p(text=t1, return_tensors="pt").to(m.device)
+        l1 = i1["input_ids"].shape[-1]
+        o1 = m.generate(**i1, max_new_tokens=1024, num_beams=4, do_sample=False, repetition_penalty=1.15)
+        r1 = p.decode(o1[0][l1:], skip_special_tokens=False)
         try:
-            parsed = p.parse_response(res)['content']
+            draft = p.parse_response(r1)['content']
         except Exception:
-            parsed = res.replace("<eos>", "").replace("<|im_end|>", "").strip()
+            draft = r1.replace("<eos>", "").replace("<|im_end|>", "").strip()
+        i1.to('cpu')
+        del i1, o1
 
-        o.append({'rid': x['rid'], 'translation': parsed.strip()})
-        i.to('cpu')
+        # pass2 gender+style fix
+        t2 = p.apply_chat_template([{"role": "user", "content": P2.format(src=src_t, draft=draft)}], tokenize=False, add_generation_prompt=True, enable_thinking=False)
+        i2 = p(text=t2, return_tensors="pt").to(m.device)
+        l2 = i2["input_ids"].shape[-1]
+        o2 = m.generate(**i2, max_new_tokens=1024, do_sample=False)
+        r2 = p.decode(o2[0][l2:], skip_special_tokens=False)
+        try:
+            final = p.parse_response(r2)['content']
+        except Exception:
+            final = r2.replace("<eos>", "").replace("<|im_end|>", "").strip()
+        i2.to('cpu')
+        del i2, o2
+
+        out_t = final.strip() if len(final.strip()) > 5 else draft.strip()
+        res_arr.append({'rid': x['rid'], 'translation': out_t})
 
     with open("output.json", "w") as f:
-        json.dump(o, f, ensure_ascii=False)
+        json.dump(res_arr, f, ensure_ascii=False)
 
 if __name__ == "__main__":
     main()
