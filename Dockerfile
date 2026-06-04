@@ -1,11 +1,12 @@
-FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
+FROM cr.yandex/crp2q2b12lka2f8enigt/pytorch/pytorch:2.8.0-cuda12.6-cudnn9-runtime
 
-# Sub-optimal installation to bypass anti-cheat heuristics
-RUN apt-get update && apt-get install -y wget git
-RUN pip install "transformers==5.5.0"
-RUN pip install torch accelerate sacrebleu peft
+RUN apt-get update && apt-get install -y build-essential
+
+RUN pip3 install --no-cache-dir \
+    "accelerate" \
+    "transformers==5.5.0"
 
 WORKDIR /workspace
 COPY . .
 
-ENTRYPOINT ["python", "solution.py"]
+ENTRYPOINT ["python3", "solution.py"]
