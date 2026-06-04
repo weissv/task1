@@ -10,7 +10,7 @@ STRICT RULES:
 1. DO NOT change punctuation types. Keep original single (') and double (") quotes. NEVER use French guillemets (« »).
 2. Transliterate IT terminology (e.g., "fork" -> "форк", "commit" -> "коммит", "deploy" -> "деплой").
 3. Output ONLY the translation. No explanations, no introductory words.
-4. Maintain grammatical gender agreement. Track pronouns (she/her, he/him) to use correct Russian verb endings (e.g., if subject uses 'she', use feminine: 'сказала', 'заявила', 'вошла', NOT masculine 'сказал', 'заявил', 'вошёл').
+4. CRITICAL: Determine grammatical gender ONLY from pronouns (she/her -> feminine, he/him -> masculine), NEVER from the person's name. Names can be misleading. If the text says "she", ALL verbs for that person MUST be feminine (заявила, сказала, вошла), even if the name looks masculine.
 5. Translate "said" contextually: "said in the interview" -> "рассказал(а) в интервью"; "said that..." (formal statement) -> "заявил(а), что..."; direct speech -> "сказал(а):".
 
 Examples:
@@ -22,6 +22,9 @@ Translation: Он рассказал в интервью: 'Мы усердно �
 
 Source: She said that the experiment was successful and she was proud of the results.
 Translation: Она заявила, что эксперимент прошёл успешно и она гордилась результатами.
+
+Source: Alex said that she was confident when she presented the results.
+Translation: Алекс заявила, что она была уверена, когда представила результаты.
 
 Source: {src}
 Translation: """
