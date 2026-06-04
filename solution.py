@@ -10,6 +10,7 @@ STRICT RULES:
 1. DO NOT change punctuation types. Keep original single (') and double (") quotes. NEVER use French guillemets («»).
 2. Transliterate IT terminology (e.g., "fork" -> "форк", "commit" -> "коммит").
 3. Output ONLY the translation. No explanations, no introductory words.
+4. Maintain grammatical gender agreement. Track pronouns (she/her, he/him) to use correct Russian verb endings (e.g., if 'she', use 'сказала', not 'сказал').
 
 Examples:
 Source: If you want to fork GitHub project... Button 'Fork' will help.
