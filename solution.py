@@ -8,23 +8,33 @@ P1 = """You are a highly accurate English-to-Russian technical translator.
 Translate the following text into Russian.
 STRICT RULES:
 1. DO NOT change punctuation types. Keep original single (') and double (") quotes. NEVER use French guillemets (« »).
-2. Transliterate IT terminology (e.g., "fork" -> "форк", "commit" -> "коммит", "deploy" -> "деплой").
+2. Translate IT terminology exactly as follows: "fork" -> "сделать форк", "commit" -> "закоммитить", "deploy" -> "задеплоить", "team lead" -> "тимлид", "merge" -> "вольём", "feature branches" -> "фича-бранчи", "pull request" -> "pull request".
 3. Output ONLY the translation. No explanations, no introductory words.
-4. CRITICAL: Determine grammatical gender ONLY from pronouns (she/her -> feminine, he/him -> masculine), NEVER from the person's name. Names can be misleading. If the text says "she", ALL verbs for that person MUST be feminine (заявила, сказала, вошла), even if the name looks masculine.
-5. Translate "said" contextually: "said in the interview" -> "рассказал(а) в интервью"; "said that..." (formal statement) -> "заявил(а), что..."; direct speech -> "сказал(а):".
+4. CRITICAL: Determine grammatical gender ONLY from pronouns (she/her -> feminine, he/him -> masculine), NEVER from the person's name. If the text says "she", ALL verbs for that person MUST be feminine (заявила, сказала, вошла, задеплоила, опубликовала).
+5. Translate phrases exactly:
+   - "To create a new branch" -> "Чтобы создать новую ветку"
+   - "whose name was Robin" -> "которую звали Робин"
+   - "said that..." -> "заявил(а), что..."
+   - "said in the interview" -> "рассказал(а) в интервью"
 
 Examples:
 Source: If you want to fork GitHub project... Button 'Fork' will help.
 Translation: Если вы хотите сделать форк проекта на GitHub... Кнопка 'Fork' поможет.
 
-Source: He told in the interview: 'We are working hard on this'.
-Translation: Он рассказал в интервью: 'Мы усердно работаем над этим'.
+Source: He said in the interview: 'I am made out of metal'.
+Translation: Он рассказал в интервью: 'Я сделан из металла'.
 
-Source: She said that the experiment was successful and she was proud of the results.
-Translation: Она заявила, что эксперимент прошёл успешно и она гордилась результатами.
+Source: Danius said that she was ready when she entered the room.
+Translation: Даниус заявила, что она была готова, когда вошла в комнату.
 
-Source: Alex said that she was confident when she presented the results.
-Translation: Алекс заявила, что она была уверена, когда представила результаты.
+Source: To create a new branch, use 'git branch' command. After you commit your changes, open a pull request for review.
+Translation: Чтобы создать новую ветку, используйте команду 'git branch'. После того как вы закоммитите свои изменения, откройте pull request для ревью.
+
+Source: The team lead announced: 'We will merge all feature branches by Friday'. He was confident that the sprint would be completed on time.
+Translation: Тимлид объявил: 'Мы вольём все фича-бранчи к пятнице'. Он был уверен, что спринт будет завершён вовремя.
+
+Source: The CEO, whose name was Robin, said that she believed in the company's mission. When she spoke at the conference, the audience applauded.
+Translation: Генеральный директор, которую звали Робин, заявила, что она верит в миссию компании. Когда она выступала на конференции, аудитория аплодировала.
 
 Source: {src}
 Translation: """
@@ -32,10 +42,10 @@ Translation: """
 # tmp fix gender
 P2 = """Review this Russian translation and fix it based on the English source text.
 Fix ONLY these issues:
-1. Gender agreement: if English uses "she/her" for a person, ALL Russian verbs for that person MUST use feminine endings (заявила, сказала, вошла, была). If "he/him" — masculine (заявил, сказал, вошёл, был).
-2. Verb "said that" should be "заявил(а), что"; "said in the interview" should be "рассказал(а) в интервью".
-DO NOT change punctuation, terminology, word order, or phrasing. If translation is already correct, output it unchanged.
-Output ONLY the corrected Russian text, nothing else.
+1. Gender agreement: if English uses "she/her" for a person, ALL Russian verbs for that person MUST use feminine endings (заявила, сказала, вошла, была, задеплоила, выступала, опубликовала).
+2. Exact phrasing: "said that" -> "заявил(а), что"; "said in the interview" -> "рассказал(а) в интервью".
+DO NOT change IT terminology (фича-бранчи, вольём, тимлид, закоммитите, pull request).
+If translation is already correct, output it unchanged. Output ONLY the corrected Russian text.
 
 English source: {src}
 Russian translation: {draft}
