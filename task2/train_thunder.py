@@ -14,7 +14,6 @@ from peft import LoraConfig, get_peft_model, TaskType
 import huggingface_hub
 
 def main():
-    huggingface_hub.login("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")
     print("🚀 Запуск подготовки обучения на NLLB-3.3B...")
 
     # 1. Проверка корпуса
@@ -99,7 +98,6 @@ def main():
         warmup_steps=500,
         lr_scheduler_type="cosine",
         bf16=True,                              # Bfloat16 для стабильности
-        group_by_length=True,                   # Ускорение
         eval_strategy="epoch",
         save_strategy="epoch",
         save_total_limit=2,
@@ -117,7 +115,6 @@ def main():
         args=training_args,
         train_dataset=tokenized_train,
         eval_dataset=tokenized_val,
-        tokenizer=tokenizer,
         data_collator=data_collator,
     )
 
