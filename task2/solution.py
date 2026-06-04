@@ -4,7 +4,11 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
 tokenizer = AutoTokenizer.from_pretrained("./weights", src_lang="rus_Cyrl")
-model = AutoModelForSeq2SeqLM.from_pretrained("./weights").cuda()
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    "./weights",
+    torch_dtype=torch.bfloat16,
+    low_cpu_mem_usage=True
+).cuda()
 model.eval()
 
 with open("input.pickle", "rb") as f:

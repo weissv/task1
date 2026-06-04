@@ -1,0 +1,21 @@
+{
+  "backend": "tokenizers",
+  "bos_token": "<s>",
+  "cls_token": "<s>",
+  "eos_token": "</s>",
+  "extra_special_tokens": [
+    "abk_Cyrl"
+  ],
+  "is_local": false,
+  "legacy_behaviour": false,
+  "local_files_only": false,
+  "mask_token": "<mask>",
+  "model_max_length": 1024,
+  "pad_token": "<pad>",
+  "sep_token": "</s>",
+  "sp_model_kwargs": {},
+  "src_lang": "abk_Cyrl",
+  "tgt_lang": null,
+  "tokenizer_class": "NllbTokenizer",
+  "unk_token": "<unk>"
+}
